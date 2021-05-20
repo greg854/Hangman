@@ -4,11 +4,13 @@ import base64
 import random
 
 #Global variables, these are known and used in all of the program in any function
-WORD_LIST = []
-IMAGE_LIST = []
-GAME_WORD = []
-LOSER_IMAGE = 0
-WINNER_IMAGE = 0
+WORD_LIST = []      #A list of the words for the game to choose from
+IMAGE_LIST = []     #A list of the images to be used in the game
+GAME_WORD = []      #The selected word to guess broken down to a list of the letters that make it up
+LOSER_IMAGE = 0     #The loser image
+WINNER_IMAGE = 0    #The winner image
+CURRENT_WORKING_DIRECTORY = os.getcwd()     #The current working directory, used in file opening
+
 #Dictionsry used to indicate if a letter has been perviously selected
 LETTER_DICTIONARY = {'a':False,'b':False,'c':False,'d':False,'e':False,'f':False,'g':False,'h':False,'i':False,'j':False,'k':False,'l':False,'m':False,'n':False,'o':False,'p':False,'q':False,'r':False,'s':False,'t':False,'u':False,'v':False,'w':False,'x':False,'y':False,'z':False}
 
@@ -27,19 +29,18 @@ def loadAllImages():
 
 #Load a single image from a file to memory to be used by the program
 #It is assumed that the path to the directory that contains the images is:
-# The current working directory (cwd) + venv (Python virtual environment which is a part of PyCharm)
-# + images (the image directory)
+# The current working directory (CURRENT_WORKING_DIRECTORY) + images (the image directory)
 #We use base 64 encoding because we use PySimpleGUI to display the application and in order to display images
 #PySimpleGUI needs them to be in PNG format and encoded in base 64 (which is just a way of representing the image values
 #in one of 64 symbols)
 def loadImage(imageName):
-    cwd = os.getcwd()
     #Debug: uncomment the print statement to make sure the file path to the current working directory is correct
-    #print(cwd)
+    #print(CURRENT_WORKING_DIRECTORY)
     #file name is combined with the file type extension to point to the right file
     fname = imageName+'.png'
     #We use \\ to denote a single \ in a string. This is Windows specific, for Linux we need to change this to /
-    img64 = open('{}\\venv\\images\\{}'.format(cwd, fname),'rb+')
+    #We open the file with read permissions (r), it's a binary file (b), open the file for updating (+)
+    img64 = open('{}\\images\\{}'.format(CURRENT_WORKING_DIRECTORY, fname),'rb+')
     base64_image = base64.b64encode(img64.read())
 
     return base64_image
@@ -132,7 +133,7 @@ def createGameWindow():
                 if numberOfFailedLetterPicks == maxNumOfTries:
                     #If we got here, we have reached the maximum number of tries
                     imageElement.Update(data=LOSER_IMAGE)
-                    break
+                    continue
                 #If we got here then we have not found another letter
                 imageElement.Update(data=IMAGE_LIST[numberOfFailedLetterPicks])
                 numberOfFailedLetterPicks = numberOfFailedLetterPicks +1
@@ -181,7 +182,7 @@ def loadWordList():
     #declare WORD_LIST as global since it is not a variable in this function, but it's declared outside the function
     #for the entire program to use
     global WORD_LIST
-    #open the file with the word list and create the list with words
+    #open the file with the word list and create the list with words, this is the standard way of opening a file
     with open('wordlist.txt', "r") as wordFile:
         for line in wordFile:
             WORD_LIST.extend(line.split())
